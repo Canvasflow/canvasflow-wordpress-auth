@@ -1,0 +1,29 @@
+services:
+
+  wp:
+    image: wordpress:6.4.2-php8.1-apache
+    ports:
+      - 8088:80
+    volumes:
+      - ./:/var/www/html/wp-content/plugins/canvasflow-auth
+      - db_data:/var/lib/mysql
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DEBUG: 1
+    restart: always
+    depends_on:
+      - db
+  db:
+    image: mysql:5.5
+    ports:
+      - 3306:3306
+    platform: linux/x86_64
+    environment:
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+      MYSQL_ROOT_PASSWORD: wordpress
+volumes:
+    db_data:
