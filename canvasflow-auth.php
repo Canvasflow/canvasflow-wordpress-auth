@@ -9,6 +9,7 @@
  *
  * @wordpress-plugin
  * Plugin Name: Canvasflow Auth
+ * Requires Plugins: WooCommerce
  * Plugin URI:  https://github.com/Canvasflow/canvasflow-wordpress-auth
  * Description: This plugin is an authentication connector for Canvasflow
  * Version:     0.1.0
@@ -18,8 +19,16 @@
  * License URI: http://www.gnu.org/licenses/gpl-2.0.txt
  */
 
- function display_hello_world_page() {
-  echo 'This is the page for canvasflow auth';
+ require_once(plugin_dir_path( __FILE__ ) . 'includes/canvasflow-auth-controller.php');
+
+ add_action( 'rest_api_init',  function () {
+	$controller = new Canvasflow_Auth_Controller();
+	$controller->register_routes();
+});
+
+
+ function display_page() {
+  echo require_once(plugin_dir_path( __FILE__ ) . 'includes/views/canvasflow-auth-view.php');
 }
 
 function hello_world_admin_menu() {
@@ -28,7 +37,7 @@ function hello_world_admin_menu() {
         'Canvasflow Auth',// menu title
         'manage_options',// capability
         'canvasflow-auth',// menu slug
-        'display_hello_world_page' // callback function
+        'display_page' // callback function
     );
 }
 add_action('admin_menu', 'hello_world_admin_menu');

@@ -1,7 +1,6 @@
 services:
-
   wp:
-    image: wordpress:6.4.2-php8.1-apache
+    image: wordpress:6.6.1-php8.1-apache
     ports:
       - 8088:80
     volumes:
@@ -16,14 +15,16 @@ services:
     depends_on:
       - db
   db:
-    image: mysql:5.5
+    image: mariadb
     ports:
       - 3306:3306
-    platform: linux/x86_64
     environment:
-      MYSQL_DATABASE: wordpress
-      MYSQL_USER: wordpress
-      MYSQL_PASSWORD: wordpress
-      MYSQL_ROOT_PASSWORD: wordpress
+      - MYSQL_ROOT_PASSWORD=wordpress
+      - MYSQL_DATABASE=wordpress
+      - MYSQL_USER=wordpress
+      - MYSQL_PASSWORD=wordpress
+    volumes:
+      - ./database:/var/lib/mysql
+
 volumes:
-    db_data:
+  db_data:
