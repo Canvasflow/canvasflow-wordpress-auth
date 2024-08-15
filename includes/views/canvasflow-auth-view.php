@@ -11,7 +11,6 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 } else {
     echo (
         "<div>
-
     <p>Please install dependencies: WooCommerce, WooCommerce Subscriptions</p>
 <div>"
     );
