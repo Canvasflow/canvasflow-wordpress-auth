@@ -63,12 +63,21 @@ function section_one_callback() {
 
 function field_one_callback() {
   $setting = esc_attr( get_option( 'my-setting' ) );
-  echo "<select name='my-setting' id='role' > 
-  <option value='subscriber' " . ($setting==="subscriber" ? "selected" : "") . ">Subscriber</option>
-  <option value='customer' " . ($setting==="customer" ? "selected" : "") . ">Customer</option> 
-  <option value='contributor' " . ($setting==="contributor" ? "selected" : "") . ">Contributor</option> 
-  </select>";
+  echo "<select name='my-setting' id='role' >";
+  echo  wp_dropdown_roles($setting);
+  echo "</select>";
+
 }
+
+
+function get_role_names() {
+  global $wp_roles;
+  
+  if ( ! isset( $wp_roles ) )
+      $wp_roles = new WP_Roles();
+  
+  return $wp_roles->get_names();
+  }
 
 
 function my_options_page() {
