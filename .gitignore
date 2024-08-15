@@ -16,7 +16,9 @@
 /readme.html
 /wp-*.php
 /xmlrpc.php
+/database
 
+.DS_Store
 
 # Configuration
 wp-config.php
