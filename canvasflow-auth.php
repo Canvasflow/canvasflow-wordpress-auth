@@ -19,24 +19,29 @@
  * License URI: http://www.gnu.org/licenses/gpl-2.0.txt
  */
 
-define( 'AUTH_DEFAULT_ROLE', 'subscriber' );
-  
-require_once(plugin_dir_path( __FILE__ ) . 'includes/canvasflow-auth-controller.php');
-require_once(plugin_dir_path( __FILE__ ) . 'includes/canvasflow-auth-settings.php');
+define('AUTH_DEFAULT_ROLE', 'subscriber');
+
+require_once (plugin_dir_path(__FILE__) . 'includes/canvasflow-auth-controller.php');
+require_once (plugin_dir_path(__FILE__) . 'includes/canvasflow-auth-settings.php');
 
 $option_key = Canvasflow_Auth_Settings::$option_key;
 
 Canvasflow_Auth_Settings::init();
 Canvasflow_Auth_Controller::init($option_key);
 
+register_activation_hook(__FILE__, 'on_activate');
+register_uninstall_hook(__FILE__, 'on_uninstall');
 
-register_activation_hook( __FILE__, 'on_activate');
-register_uninstall_hook( __FILE__, 'on_uninstall');
-
-function on_activate() {
-  register_uninstall_hook( __FILE__, array( 'Canvasflow_Auth_Settings', 'activate' ));
+function on_activate(){
+    register_uninstall_hook(__FILE__, array(
+        'Canvasflow_Auth_Settings',
+        'activate'
+    ));
 }
 
-function on_uninstall() {
-  register_uninstall_hook( __FILE__, array( 'Canvasflow_Auth_Settings', 'uninstall' ));
+function on_uninstall(){
+    register_uninstall_hook(__FILE__, array(
+        'Canvasflow_Auth_Settings',
+        'uninstall'
+    ));
 }

@@ -2,10 +2,17 @@
     <h1>Canvasflow Auth</h1>
     <div class="plugins">
         <h2>Required Plugins</h2>
-        <?php if(!$is_woocommerce) {?>
-            <p>✅ WooCommerce activated</p>
+        
+        <?php if($is_woocommerce) {?>
+            <p>✅ <b>WooCommerce</b> activated</p>
         <?php } else { ?>
-            <p>❌ WooCommerce activation is required</p>
+            <p>❌ <b>WooCommerce</b> activation is required</p>
+        <?php } ?>
+
+        <?php if($is_woocommerce_subscription) {?>
+            <p>✅ <b>WooCommerce Subscription</b> activated</p>
+        <?php } else { ?>
+            <p>❌ <b>WooCommerce Subscription</b> activation is required</p>
         <?php } ?>
     </div>
     <br/>
