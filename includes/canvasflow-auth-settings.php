@@ -3,8 +3,9 @@ class Canvasflow_Auth_Settings {
     public $title = "Canvasflow Auth";
     public $menu_title = "Canvasflow Auth";
     public $plugin_name = "";
-    public $option_key = "";
+    
 
+    public static $option_key = 'canvasflow_auth_role';
     public static $option_group = "canvasflow-settings-group";
     
     public static function init($settings) {
@@ -17,7 +18,6 @@ class Canvasflow_Auth_Settings {
 
     function __construct($settings) {
         $this->plugin_name = $settings['plugin_name'];
-        $this->option_key = $settings['option_key'];
         add_action("admin_menu", [$this, "add_plugin_page"]);
         add_action("admin_init", [$this, "admin_init"]);
     }
@@ -53,7 +53,7 @@ class Canvasflow_Auth_Settings {
     public function admin_init() {
         $option_group = self::$option_group;
 
-        register_setting($option_group, $this->option_key);
+        register_setting($option_group, self::$option_key);
         add_settings_section(
           $option_group, 
           __("") , 
@@ -71,7 +71,7 @@ class Canvasflow_Auth_Settings {
     }
 
     public static function activate() {
-        $option_key = $this->option_key;
+        $option_key = self::$option_key;
         $available_roles = [];
         $get_all_roles = wp_roles()->roles;
         foreach ($get_all_roles as $k => $v) {
@@ -88,7 +88,7 @@ class Canvasflow_Auth_Settings {
     }
 
     public static function uninstall() {
-        $option_key = $this->option_key;
+        $option_key = self::$option_key;
         if ("" === get_option($option_key, "")) {
             delete_option($option_key);
         }

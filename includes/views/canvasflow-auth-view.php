@@ -18,7 +18,9 @@
     <br/>
     <div class="user-role">
         <h3>User Role</h3>
-        <small>Description</small>
+        <small>Match to the same value assigned to <b>
+        Subscriber Default Role</b> in the 
+        <a href="?page=wc-settings&tab=subscriptions">WooCommerce Subscription </a> settings page.</small>
         <form method="post" action="options.php">
             <?php
                 settings_fields( $setting_group ); // settings group name

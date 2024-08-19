@@ -31,7 +31,7 @@ $plugin_name = 'canvasflow-auth';
 $settings = array(
   'major_version' => $major_version,
   'version' => $major_version.".1.0",
-  'option_key' => 'canvasflow_auth_role',
+  'option_key' => Canvasflow_Auth_Settings::$option_key,
   'plugin_name' => $plugin_name
 );
 

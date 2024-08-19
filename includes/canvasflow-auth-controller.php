@@ -34,6 +34,17 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
             }
         ));
 
+        register_rest_route($this->namespace, '/info', array(
+            'methods' => WP_REST_Server::READABLE,
+            'callback' => array(
+                $this,
+                'info'
+            ) ,
+            'permission_callback' => function () {
+                return true;
+            }
+        ));
+
         register_rest_route($this->namespace, '/login', array(
             'methods' => WP_REST_Server::CREATABLE,
             'callback' => array(
@@ -54,7 +65,18 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
      */
     public function health_check($request) {
         return new WP_REST_Response(array(
-            "health" => true,
+            "health" => true
+        ) , 200);
+    }
+
+     /**
+     * Health Check endpoint
+     *
+     * @param WP_REST_Request $request Full data about the request.
+     * @return WP_Error|WP_REST_Response
+     */
+    public function info($request) {
+        return new WP_REST_Response(array(
             "version" => $this->version,
             'user_role' => get_option($this->option_key, '')
         ) , 200);
@@ -93,14 +115,14 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
         $date = null;
 
 		// TODO Return the correct subscription date
-        //$is_subscription = wcs_user_has_subscription( $user->ID );
-        //   if ( $is_subscription )
-        //   {
-        // 	$subscriptions = wcs_get_users_subscriptions($user->ID );
-        // 	  $subscription  = reset( $subscriptions );
-        // 	  if ( $subscription->get_status() == 'active' ) {
-        // 		$date="fecha";
-        // 		}
+        $is_subscription = wcs_user_has_subscription( $user->ID );
+        if ($is_subscription ) {
+            $subscriptions = wcs_get_users_subscriptions($user->ID );
+            $subscription  = reset( $subscriptions );
+            if($subscription->get_status() == 'active' ) {
+         	    $date="fecha";
+         	}
+        }
         return new WP_REST_Response(array(
             "success" => "Y",
             "error" => "N",
