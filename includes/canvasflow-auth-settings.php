@@ -21,15 +21,36 @@ class Canvasflow_Auth_Settings {
     }
 
     public function add_plugin_page() {
-        add_options_page($this->title, // Page Title
-        $this->menu_title, // Menu Title
-        "manage_options", // Capability
-        self::$plugin_name, // Plugin Name
-        [$this, "render"]);
+        add_options_page(
+          $this->title, // Page Title
+          $this->menu_title, // Menu Title
+          "manage_options", // Capability
+          self::$plugin_name, // Plugin Name
+          [$this, "render"]
+        );
+    }
+
+    public function render() {
+      $plugin_name = self::$plugin_name;
+      $option_key = self::$option_key;
+      $setting_group = self::$option_group;
+      $selected_role = get_option($option_key, "");
+
+      // Check if plugins are active
+      $is_woocommerce = is_plugin_active("woocommerce/woocommerce.php");
+      $is_woocommerce_subscription = is_plugin_active(
+        "woocommerce-subscriptions/woocommerce-subscriptions.php");
+      $is_active = array(
+        'woocommerce' => $is_woocommerce,
+        'woocommerce-subscriptions' =>  $is_woocommerce_subscription
+      );
+
+      include plugin_dir_path(__FILE__) . "views/canvasflow-auth-view.php";
     }
 
     public function admin_init() {
         $option_group = self::$option_group;
+
         register_setting($option_group, self::$option_key);
         add_settings_section(
           $option_group, 
@@ -47,21 +68,8 @@ class Canvasflow_Auth_Settings {
         echo "</select>";
     }
 
-    public function render() {
-        $plugin_name = self::$plugin_name;
-        $option_key = self::$option_key;
-        $setting_group = self::$option_group;
-        $is_woocommerce = is_plugin_active("woocommerce/woocommerce.php");
-        $is_woocommerce_subscription = is_plugin_active(
-          "woocommerce-subscriptions/woocommerce-subscriptions.php");
-
-        $selected_role = get_option($option_key, "");
-
-        include plugin_dir_path(__FILE__) . "views/canvasflow-auth-view.php";
-    }
-
     public static function activate() {
-        $option_key = Canvasflow_Auth_Settings::$option_key;
+        $option_key = self::$option_key;
         $available_roles = [];
         $get_all_roles = wp_roles()->roles;
         foreach ($get_all_roles as $k => $v) {
@@ -78,7 +86,7 @@ class Canvasflow_Auth_Settings {
     }
 
     public static function uninstall() {
-        $option_key = Canvasflow_Auth_Settings::$option_key;
+        $option_key = self::$option_key;
         if ("" === get_option($option_key, "")) {
             delete_option($option_key);
         }

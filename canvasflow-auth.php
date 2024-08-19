@@ -21,8 +21,12 @@
 
 define('AUTH_DEFAULT_ROLE', 'subscriber');
 
-require_once (plugin_dir_path(__FILE__) . 'includes/canvasflow-auth-controller.php');
-require_once (plugin_dir_path(__FILE__) . 'includes/canvasflow-auth-settings.php');
+require_once(
+  plugin_dir_path(__FILE__) . 'includes/canvasflow-auth-controller.php'
+);
+require_once (
+  plugin_dir_path(__FILE__) . 'includes/canvasflow-auth-settings.php'
+);
 
 $option_key = Canvasflow_Auth_Settings::$option_key;
 

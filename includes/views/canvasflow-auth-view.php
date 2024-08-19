@@ -3,13 +3,13 @@
     <div class="plugins">
         <h2>Required Plugins</h2>
         
-        <?php if($is_woocommerce) {?>
+        <?php if($is_active['woocommerce']) {?>
             <p>✅ <b>WooCommerce</b> activated</p>
         <?php } else { ?>
             <p>❌ <b>WooCommerce</b> activation is required</p>
         <?php } ?>
 
-        <?php if($is_woocommerce_subscription) {?>
+        <?php if($is_active['woocommerce-subscriptions']) {?>
             <p>✅ <b>WooCommerce Subscription</b> activated</p>
         <?php } else { ?>
             <p>❌ <b>WooCommerce Subscription</b> activation is required</p>

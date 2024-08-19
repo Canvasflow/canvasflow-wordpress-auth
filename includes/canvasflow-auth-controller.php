@@ -6,8 +6,7 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
 
     public static function init($role) {
         static $plugin;
-        if (!isset($plugin))
-        {
+        if (!isset($plugin)) {
             $plugin = new Canvasflow_Auth_Controller($role);
         }
         return $plugin;
@@ -68,14 +67,16 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
         $parameters = $request->get_params();
         $username = $parameters['username'];
         $password = $parameters['password'];
+		// TODO Check if the params are empty don't even process
 
-        $login_data = array();
-        $login_data['user_login'] = $username;
-        $login_data['user_password'] = $password;
+        $login_data = array(
+			'user_login' => $username,
+			'user_password' => $password
+		);
 
         $user = wp_signon($login_data, false);
-        if (is_wp_error($user) || !in_array('subscriber', $user->roles))
-        {
+		$role = get_option($this->option_key, "");
+        if (is_wp_error($user) || !in_array($role, $user->roles)) {
             return new WP_REST_Response(array(
                 "success" => "Y",
                 "error" => "N",
@@ -87,6 +88,8 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
         }
 
         $date = null;
+
+		// TODO Return the correct subscription date
         //$is_subscription = wcs_user_has_subscription( $user->ID );
         //   if ( $is_subscription )
         //   {
@@ -107,6 +110,5 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
             )
         ) , 200);
     }
-
 }
 ?>
