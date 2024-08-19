@@ -96,7 +96,7 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
 
         $login_data = array(
 			'user_login' => $username,
-			'user_password' => $password
+		sftp://woo-perfectly-mellow-aglet.wordpress.com@sftp.wp.com:22/htdocs/wp-content/plugins/canvasflow-wordpress-auth-1/includes/canvasflow-auth-controller.php	'user_password' => $password
 		);
 
         $user = wp_signon($login_data, false);
@@ -114,14 +114,24 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
 
         $date = null;
 
-		// TODO Return the correct subscription date
+        $raw_date=new Datetime();
         $is_subscription = wcs_user_has_subscription( $user->ID );
-        if ($is_subscription ) {
-            $subscriptions = wcs_get_users_subscriptions($user->ID );
-            $subscription  = reset( $subscriptions );
-            if($subscription->get_status() == 'active' ) {
-         	    $date="fecha";
-         	}
+        if ( $is_subscription )
+        {
+            $subscriptions = wcs_get_users_subscriptions( $user->ID ); 
+            if ( count( $subscriptions ) > 0 ) {
+                foreach ( $subscriptions as $sub_id => $subscription ) {
+                    if ( $subscription->get_status() == 'active' ) {
+                      $sub_info =wcs_get_subscription($sub_id );
+                      $end_date = $subscription->get_date('end');
+                      $check_date = new DateTime($end_date);
+                      if($check_date > $raw_date){
+                        $raw_date = new DateTime($end_date);
+                        $date = $raw_date->format(DateTime::ATOM);
+                      }
+                    }
+                }    
+            }
         }
         return new WP_REST_Response(array(
             "success" => "Y",
