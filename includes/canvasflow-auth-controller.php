@@ -94,9 +94,10 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
         $password = $parameters['password'];
 		// TODO Check if the params are empty don't even process
 
+
         $login_data = array(
 			'user_login' => $username,
-		sftp://woo-perfectly-mellow-aglet.wordpress.com@sftp.wp.com:22/htdocs/wp-content/plugins/canvasflow-wordpress-auth-1/includes/canvasflow-auth-controller.php	'user_password' => $password
+			'user_password' => $password
 		);
 
         $user = wp_signon($login_data, false);
@@ -113,7 +114,7 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
         }
 
         $date = null;
-
+        $digital_access = "N";
         $raw_date=new Datetime();
         $is_subscription = wcs_user_has_subscription( $user->ID );
         if ( $is_subscription )
@@ -128,6 +129,7 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
                       if($check_date > $raw_date){
                         $raw_date = new DateTime($end_date);
                         $date = $raw_date->format(DateTime::ATOM);
+                        $digital_access = "Y";
                       }
                     }
                 }    
@@ -140,7 +142,7 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
                 "login" => "SUCCESS",
                 "email" => $user->user_email,
                 "subscription_level" => "registered",
-                "digital_access" => "N",
+                "digital_access" => $digital_access,
                 "expiration_date" => $date
             )
         ) , 200);
