@@ -21,17 +21,22 @@
 
 define('AUTH_DEFAULT_ROLE', 'subscriber');
 
-require_once(
-  plugin_dir_path(__FILE__) . 'includes/canvasflow-auth-controller.php'
-);
-require_once (
-  plugin_dir_path(__FILE__) . 'includes/canvasflow-auth-settings.php'
+$dir_path = plugin_dir_path(__FILE__);
+require_once($dir_path.'includes/canvasflow-auth-controller.php');
+require_once ($dir_path.'includes/canvasflow-auth-settings.php');
+
+$major_version = 0;
+$plugin_name = 'canvasflow-auth';
+
+$settings = array(
+  'major_version' => $major_version,
+  'version' => $major_version.".1.0",
+  'option_key' => 'canvasflow_auth_role',
+  'plugin_name' => $plugin_name
 );
 
-$option_key = Canvasflow_Auth_Settings::$option_key;
-
-Canvasflow_Auth_Settings::init();
-Canvasflow_Auth_Controller::init($option_key);
+Canvasflow_Auth_Settings::init($settings);
+Canvasflow_Auth_Controller::init($settings);
 
 register_activation_hook(__FILE__, 'on_activate');
 register_uninstall_hook(__FILE__, 'on_uninstall');

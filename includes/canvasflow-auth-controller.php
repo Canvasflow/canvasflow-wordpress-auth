@@ -1,6 +1,6 @@
 <?php
 class Canvasflow_Auth_Controller extends WP_REST_Controller {
-    public $version = '1';
+    public $version = '';
     public $namespace = '';
     public $option_key = '';
 
@@ -12,9 +12,11 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
         return $plugin;
     }
 
-    function __construct($role) {
-        $this->option_key = $role;
-        $this->namespace = 'canvasflow-auth/v' . $this->version;
+    function __construct($settings) {
+        $plugin_name = $settings['plugin_name'];
+        $this->version = $settings['version'];
+        $this->option_key = $settings['option_key'];
+        $this->namespace = $plugin_name."/v".$settings['major_version'];
         add_action('rest_api_init', function () {
             $this->register();
         });
@@ -53,7 +55,8 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
     public function health_check($request) {
         return new WP_REST_Response(array(
             "health" => true,
-            'role' => get_option($this->option_key, '')
+            "version" => $this->version,
+            'user_role' => get_option($this->option_key, '')
         ) , 200);
     }
 
