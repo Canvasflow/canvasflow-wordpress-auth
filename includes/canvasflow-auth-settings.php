@@ -34,7 +34,7 @@ class Canvasflow_Auth_Settings {
 
     public function render() {
       $plugin_name = $this->plugin_name;
-      $option_key = $this->option_key;
+      $option_key = self::$option_key;
       $setting_group = self::$option_group;
       $selected_role = get_option($option_key, "");
 
@@ -63,7 +63,7 @@ class Canvasflow_Auth_Settings {
     }
 
     public function user_role_section() {
-        $option_key = $this->option_key;
+        $option_key = self::$option_key;
         $setting = esc_attr(get_option($option_key));
         echo "<select name='" . $option_key . "' id='user-role' >";
         echo wp_dropdown_roles($setting);
