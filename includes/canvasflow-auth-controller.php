@@ -3,6 +3,10 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
     public $version = '';
     public $namespace = '';
     public $option_key = '';
+    public static $headers = [
+        'Access-Control-Allow-Origin'   => '*',
+        'Access-Control-Allow-Methods' => 'POST, GET, OPTIONS',
+    ];
 
     public static function init($role) {
         static $plugin;
@@ -64,9 +68,13 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
      * @return WP_Error|WP_REST_Response
      */
     public function health_check($request) {
-        return new WP_REST_Response(array(
+        $response = new WP_REST_Response;
+        $response->set_data([
             "health" => true
-        ) , 200);
+        ]);
+        $response->set_headers(self::$headers);
+        $response->set_status( 200 );
+        return $response;
     }
 
      /**
@@ -76,10 +84,14 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
      * @return WP_Error|WP_REST_Response
      */
     public function info($request) {
-        return new WP_REST_Response(array(
+        $response = new WP_REST_Response;
+        $response->set_data([
             "version" => $this->version,
             'user_role' => get_option($this->option_key, '')
-        ) , 200);
+        ]);
+        $response->set_headers(self::$headers);
+        $response->set_status( 200 );
+        return $response;
     }
 
     /**
@@ -89,36 +101,38 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
      * @return WP_Error|WP_REST_Response
      */
     public function auth($request) {
+        $response = new WP_REST_Response;
+        $response->set_headers(self::$headers);
+
         $parameters = $request->get_params();
         $username = $parameters['username'];
         $password = $parameters['password'];
 		// TODO Check if the params are empty don't even process
-
-
-        $login_data = array(
+        $login_data = [
 			'user_login' => $username,
 			'user_password' => $password
-		);
+        ];
 
         $user = wp_signon($login_data, false);
 		$role = get_option($this->option_key, "");
         if (is_wp_error($user) || !in_array($role, $user->roles)) {
-            return new WP_REST_Response(array(
+            $response->set_data([
                 "success" => "Y",
                 "error" => "N",
                 "response" => array(
                     "login" => "FAIL",
                     "digital_access" => "N"
                 )
-            ) , 200);
+            ]);
+            $response->set_status(403);
+            return $response;
         }
 
         $date = null;
         $digital_access = "N";
         $raw_date=new Datetime();
         $is_subscription = wcs_user_has_subscription( $user->ID );
-        if ( $is_subscription )
-        {
+        if ($is_subscription) {
             $subscriptions = wcs_get_users_subscriptions( $user->ID ); 
             if ( count( $subscriptions ) > 0 ) {
                 foreach ( $subscriptions as $sub_id => $subscription ) {
@@ -135,17 +149,22 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
                 }    
             }
         }
-        return new WP_REST_Response(array(
+
+        
+        $response->set_data([
             "success" => "Y",
             "error" => "N",
-            "response" => array(
+            "response" => [
                 "login" => "SUCCESS",
                 "email" => $user->user_email,
                 "subscription_level" => "registered",
                 "digital_access" => $digital_access,
                 "expiration_date" => $date
-            )
-        ) , 200);
+            ]
+        ]);
+        
+        $response->set_status(200);
+        return $response;
     }
 }
 ?>
