@@ -107,7 +107,27 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
         $parameters = $request->get_params();
         $username = $parameters['username'];
         $password = $parameters['password'];
-		// TODO Check if the params are empty don't even process
+
+        if ($username == '' || !isset($username)) {
+            $response->set_data([
+                "success" => "Y",
+                "error" => "N",
+                "errmsg" => "Missing required field. Requires username"
+            ]);
+            $response->set_status(422);
+            return $response;
+        }
+
+        if ($password == '' || !isset($password)) {
+            $response->set_data([
+                "success" => "Y",
+                "error" => "N",
+                "errmsg" => "Missing required field. Requires password"
+            ]);
+            $response->set_status(422);
+            return $response;
+        }
+        
         $login_data = [
 			'user_login' => $username,
 			'user_password' => $password
