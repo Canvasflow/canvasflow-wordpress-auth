@@ -59,6 +59,17 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
                 return true;
             }
         ));
+
+        register_rest_route($this->namespace, '/entitlements', array(
+            'methods' => WP_REST_Server::CREATABLE,
+            'callback' => array(
+                $this,
+                'entitlements'
+            ) ,
+            'permission_callback' => function () {
+                return true;
+            }
+        ));
     }
 
     /**
@@ -107,27 +118,7 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
         $parameters = $request->get_params();
         $username = $parameters['username'];
         $password = $parameters['password'];
-
-        if ($username == '' || !isset($username)) {
-            $response->set_data([
-                "success" => "Y",
-                "error" => "N",
-                "errmsg" => "Missing required field. Requires username"
-            ]);
-            $response->set_status(422);
-            return $response;
-        }
-
-        if ($password == '' || !isset($password)) {
-            $response->set_data([
-                "success" => "Y",
-                "error" => "N",
-                "errmsg" => "Missing required field. Requires password"
-            ]);
-            $response->set_status(422);
-            return $response;
-        }
-        
+		// TODO Check if the params are empty don't even process
         $login_data = [
 			'user_login' => $username,
 			'user_password' => $password
@@ -183,6 +174,63 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
             ]
         ]);
         
+        $response->set_status(200);
+        return $response;
+    }
+
+
+    /**
+     * Entilements endpoint
+     *
+     * @param WP_REST_Request
+     * @return WP_Error|WP_REST_Response
+     */
+    public function entitlements($request) {
+        $response = new WP_REST_Response;
+        $response->set_headers(self::$headers);
+
+        $parameters = $request->get_params();
+        $user_id = $parameters['user_id'];
+
+        $date = null;
+        $raw_date=null;
+
+        $tags = array();
+
+        $subscriptions = wcs_get_users_subscriptions( $user_id ); 
+      //  var_dump($subscriptions);
+        foreach ( $subscriptions as $sub_id => $subscription ) {
+            if ( $subscription->get_status() == 'active' ) {
+              $date = "active sub";
+              $sub_info =wcs_get_subscription($sub_id);
+              $end_date = $subscription->get_date('end');
+                if($date == null){
+                    $raw_date = new DateTime($end_date);
+                    $date = $raw_date->format(DateTime::ATOM);
+                }else{
+                        if($end_date < $raw_date){
+                            $raw_date = new DateTime($end_date);
+                            $date = $raw_date->format(DateTime::ATOM);
+                        }
+                }
+            }
+
+            if ( sizeof( $subscription_items = $subscription->get_items() ) > 0 ) {
+                foreach ( $subscription_items as $item_id => $item ) {
+                    $product = $item->get_product();
+                    $tags = $product->get_meta_tags();
+                    // NOW WE GOT THE TAGS VALUE
+                    // LETS LOOP HERE AND CREATE THE ARRAY
+                }
+            }
+
+        }            
+                 
+          $response->set_data([
+            "id" => "changed",
+            "response" => array( "premium", "basic", "free"),
+            "expiration_date" => $date
+        ]);
         $response->set_status(200);
         return $response;
     }
