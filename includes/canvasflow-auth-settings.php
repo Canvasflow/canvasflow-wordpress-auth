@@ -1,4 +1,6 @@
 <?php
+$dir_path = plugin_dir_path(__FILE__);
+require_once($dir_path.'canvasflow-auth-subscriptions.php');
 class Canvasflow_Auth_Settings {
     public $title = "Canvasflow Auth";
     public $menu_title = "Canvasflow Auth";
@@ -46,6 +48,8 @@ class Canvasflow_Auth_Settings {
         'woocommerce' => $is_woocommerce,
         'woocommerce-subscriptions' =>  $is_woocommerce_subscription
       );
+
+      $subscriptions = Canvasflow_Auth_Subscriptions::get_valid_subscriptions(249655106);
 
       include plugin_dir_path(__FILE__) . "views/canvasflow-auth-view.php";
     }

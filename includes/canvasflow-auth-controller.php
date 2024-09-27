@@ -60,7 +60,7 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
             }
         ));
 
-        register_rest_route($this->namespace, '/entitlements', array(
+        /*register_rest_route($this->namespace, '/entitlements', array(
             'methods' => WP_REST_Server::CREATABLE,
             'callback' => array(
                 $this,
@@ -69,7 +69,7 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
             'permission_callback' => function () {
                 return true;
             }
-        ));
+        ));*/
     }
 
     /**
