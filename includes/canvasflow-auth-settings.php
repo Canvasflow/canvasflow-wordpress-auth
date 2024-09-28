@@ -1,14 +1,14 @@
 <?php
-$dir_path = plugin_dir_path(__FILE__);
-require_once($dir_path.'canvasflow-auth-subscriptions.php');
+
 class Canvasflow_Auth_Settings {
     public $title = "Canvasflow Auth";
     public $menu_title = "Canvasflow Auth";
     public $plugin_name = "";
-    
 
     public static $option_key = 'canvasflow_auth_role';
     public static $option_group = "canvasflow-settings-group";
+
+    private $auth_entitlement = null;
     
     public static function init($settings) {
         static $plugin;
@@ -22,6 +22,7 @@ class Canvasflow_Auth_Settings {
         $this->plugin_name = $settings['plugin_name'];
         add_action("admin_menu", [$this, "add_plugin_page"]);
         add_action("admin_init", [$this, "admin_init"]);
+        $this->auth_entitlement = new Canvasflow_Auth_Entitlements();
     }
 
     public function add_plugin_page() {
@@ -48,8 +49,6 @@ class Canvasflow_Auth_Settings {
         'woocommerce' => $is_woocommerce,
         'woocommerce-subscriptions' =>  $is_woocommerce_subscription
       );
-
-      $subscriptions = Canvasflow_Auth_Subscriptions::get_valid_subscriptions(249655106);
 
       include plugin_dir_path(__FILE__) . "views/canvasflow-auth-view.php";
     }

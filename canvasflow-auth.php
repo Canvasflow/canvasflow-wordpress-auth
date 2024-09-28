@@ -22,6 +22,7 @@
 define('AUTH_DEFAULT_ROLE', 'subscriber');
 
 $dir_path = plugin_dir_path(__FILE__);
+require_once ($dir_path.'includes/canvasflow-auth-entitlements.php');
 require_once($dir_path.'includes/canvasflow-auth-controller.php');
 require_once ($dir_path.'includes/canvasflow-auth-settings.php');
 

@@ -15,10 +15,7 @@
             <p>❌ <b>WooCommerce Subscription</b> activation is required</p>
         <?php } ?>
     </div>
-    <div>Data</div>
-    <?php var_dump($subscriptions); ?>
     <br/>
-
     <div class="user-role">
         <h3>User Role</h3>
         <small>Match to the same value assigned to <b>

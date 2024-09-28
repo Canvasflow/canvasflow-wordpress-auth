@@ -1,12 +1,16 @@
 <?php
+
 class Canvasflow_Auth_Controller extends WP_REST_Controller {
     public $version = '';
     public $namespace = '';
     public $option_key = '';
+
     public static $headers = [
         'Access-Control-Allow-Origin'   => '*',
         'Access-Control-Allow-Methods' => 'POST, GET, OPTIONS',
     ];
+
+    public $auth_entitlement = null;
 
     public static function init($role) {
         static $plugin;
@@ -21,6 +25,7 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
         $this->version = $settings['version'];
         $this->option_key = $settings['option_key'];
         $this->namespace = $plugin_name."/v".$settings['major_version'];
+        $this->auth_entitlement = new Canvasflow_Auth_Entitlements();
         add_action('rest_api_init', function () {
             $this->register();
         });
@@ -60,16 +65,16 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
             }
         ));
 
-        /*register_rest_route($this->namespace, '/entitlements', array(
+        register_rest_route($this->namespace, '/entitlements', array(
             'methods' => WP_REST_Server::CREATABLE,
             'callback' => array(
                 $this,
-                'entitlements'
+                'get_entitlements'
             ) ,
             'permission_callback' => function () {
                 return true;
             }
-        ));*/
+        ));
     }
 
     /**
@@ -145,7 +150,7 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
         $is_subscription = wcs_user_has_subscription( $user->ID );
         if ($is_subscription) {
             $subscriptions = wcs_get_users_subscriptions( $user->ID ); 
-            if ( count( $subscriptions ) > 0 ) {
+            if (count( $subscriptions ) > 0) {
                 foreach ( $subscriptions as $sub_id => $subscription ) {
                     if ( $subscription->get_status() == 'active' ) {
                       $sub_info =wcs_get_subscription($sub_id );
@@ -161,7 +166,6 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
             }
         }
 
-        
         $response->set_data([
             "success" => "Y",
             "error" => "N",
@@ -185,51 +189,21 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
      * @param WP_REST_Request
      * @return WP_Error|WP_REST_Response
      */
-    public function entitlements($request) {
+    public function get_entitlements($request) {
         $response = new WP_REST_Response;
         $response->set_headers(self::$headers);
 
         $parameters = $request->get_params();
-        $user_id = $parameters['user_id'];
-
-        $date = null;
-        $raw_date=null;
-
-        $tags = array();
-
-        $subscriptions = wcs_get_users_subscriptions( $user_id ); 
-      //  var_dump($subscriptions);
-        foreach ( $subscriptions as $sub_id => $subscription ) {
-            if ( $subscription->get_status() == 'active' ) {
-              $date = "active sub";
-              $sub_info =wcs_get_subscription($sub_id);
-              $end_date = $subscription->get_date('end');
-                if($date == null){
-                    $raw_date = new DateTime($end_date);
-                    $date = $raw_date->format(DateTime::ATOM);
-                }else{
-                        if($end_date < $raw_date){
-                            $raw_date = new DateTime($end_date);
-                            $date = $raw_date->format(DateTime::ATOM);
-                        }
-                }
-            }
-
-            if ( sizeof( $subscription_items = $subscription->get_items() ) > 0 ) {
-                foreach ( $subscription_items as $item_id => $item ) {
-                    $product = $item->get_product();
-                    $tags = $product->get_meta_tags();
-                    // NOW WE GOT THE TAGS VALUE
-                    // LETS LOOP HERE AND CREATE THE ARRAY
-                }
-            }
-
-        }            
-                 
-          $response->set_data([
-            "id" => "changed",
-            "response" => array( "premium", "basic", "free"),
-            "expiration_date" => $date
+        $user_id = (int)$parameters['user_id'];
+        // TODO Validate that the user send the data
+        // TODO Validate that the user id actually exist
+        
+        $data = $this->auth_entitlement->get_user_entitlements($user_id);
+        
+        $response->set_data([
+            "id" => $user_id,
+            "entitlements" => $data['entitlements'],
+            "expirationDate" => $data['expiration_date']
         ]);
         $response->set_status(200);
         return $response;
