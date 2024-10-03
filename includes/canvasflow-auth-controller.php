@@ -25,7 +25,7 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
         $this->settings = $settings;
         $plugin_name = $settings['plugin_name'];
         $this->version = $settings['version'];
-        $this->option_role_key = $settings['option_role_key'];
+        $this->option_role_key = $settings['options']['role'];
         $this->namespace = $plugin_name."/v".$settings['major_version'];
         $this->auth_entitlement = new Canvasflow_Auth_Entitlements();
         add_action('rest_api_init', function () {
@@ -159,7 +159,9 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
             'id' => $user->ID
         ));
 
-        $value = (int)esc_attr(get_option($this->settings['option_access_token_key'], 10));
+        $value = (int)esc_attr(get_option(
+            $this->settings['options']['access_token'], 10)
+        );
         $expires = $value * 60; 
         
         $response->set_data([

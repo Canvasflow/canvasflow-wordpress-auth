@@ -5,20 +5,23 @@ class Canvasflow_JWT {
     private $header = array();
     private $iss = '';
     private $aud = '';
-
-    private $option_access_token_key = '';
-    private $option_refresh_token_key = '';
+    private $options = array();
 
     function __construct($settings) {
         $this->header = $this->encode(array(
             'typ' => 'JWT',
             'alg' => 'HS256'
         ));
-        $this->secret = 'canvasflow'; // TODO In here we get the value from settings
-        $this->iss = $_SERVER['SERVER_NAME']; // TODO In here we get the domain
-        $this->aud = 'canvasflow'; // TODO We get this from the api-key value
-        $this->option_access_token_key = $settings['option_access_token_key'];
-        $this->option_refresh_token_key = $settings['option_refresh_token_key'];
+        $this->iss = $_SERVER['SERVER_NAME'];
+        
+        $options = $settings['options'];
+        $this->options = $options;
+
+        $secret = esc_attr(get_option($options['secret_key'], ''));
+        $aud = esc_attr(get_option($options['client_id'], ''));
+
+        $this->secret = $secret;
+        $this->aud = $aud;
     }   
 
     public static function validate() {
@@ -27,7 +30,8 @@ class Canvasflow_JWT {
 
     public function get_access_token($user) {
         // Access Token is stored in minutes
-        $value = (int)esc_attr(get_option($this->option_access_token_key, 10));
+        $key = $this->options['access_token'];
+        $value = (int)esc_attr(get_option($key, 10));
         
         // Transform minutes to seconds
         $added_time = $value * 60; 
@@ -51,7 +55,8 @@ class Canvasflow_JWT {
 
     public function get_refresh_token($user) {
         // Refresh Token is stored in days
-        $value = (int)esc_attr(get_option($this->option_refresh_token_key, 1));
+        $key = $this->options['refresh_token'];
+        $value = (int)esc_attr(get_option($key, 1));
         
         // Transform days to seconds
         $added_time = $value * 24 * 60 * 60;

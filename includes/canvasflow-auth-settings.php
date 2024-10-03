@@ -5,10 +5,13 @@ class Canvasflow_Auth_Settings {
     public $menu_title = "Canvasflow Auth";
     public $plugin_name = "";
 
+    public static $option_group = "canvasflow-settings-group";
     public static $option_role_key = 'canvasflow_auth_role';
     public static $option_access_token_ttl_key = 'canvasflow_access_token_ttl';
     public static $option_refresh_token_ttl_key = 'canvasflow_refresh_token_ttl';
-    public static $option_group = "canvasflow-settings-group";
+    public static $option_client_id_key = 'canvasflow_client_id';
+    public static $option_secret_key = 'canvasflow_secret';
+    
     
     // Min TTL is 10 minutes
     const MIN_ACCESS_TOKEN_TTL = 10; 
@@ -68,6 +71,8 @@ class Canvasflow_Auth_Settings {
         register_setting($option_group, self::$option_role_key);
         register_setting($option_group, self::$option_access_token_ttl_key);
         register_setting($option_group, self::$option_refresh_token_ttl_key);
+        register_setting($option_group, self::$option_client_id_key);
+        register_setting($option_group, self::$option_secret_key);
 
         add_settings_section(
           $option_group, 
@@ -80,9 +85,13 @@ class Canvasflow_Auth_Settings {
     public function application_settings_section() {
         $this->user_role_section();
         echo "<br/>";
+        echo "<h3>Token Configuration</h3>";
         $this->access_token_ttl_section();
-        echo "<br/>";
         $this->refresh_token_ttl_section();
+        echo "<br/>";
+        echo "<h3>App Configuration</h3>";
+        $this->client_id_section();
+        $this->secret_key_section();
     }
 
     public function user_role_section() {
@@ -104,7 +113,7 @@ class Canvasflow_Auth_Settings {
         $option_key = self::$option_access_token_ttl_key;
         $default_ttl = self::MIN_ACCESS_TOKEN_TTL;
         $value = esc_attr(get_option($option_key, $default_ttl));
-        echo "<h3>Access Token TTL</h3>";
+        echo "<h4>Access Token TTL</h4>";
         echo "<input type='number' 
             inputmode='numeric'
             pattern='\d*'
@@ -121,7 +130,7 @@ class Canvasflow_Auth_Settings {
         $option_key = self::$option_refresh_token_ttl_key;
         $default_ttl = self::MIN_REFRESH_TOKEN_TTL;
         $value = esc_attr(get_option($option_key, $default_ttl));
-        echo "<h3>Refresh Token TTL</h3>";
+        echo "<h4>Refresh Token TTL</h4>";
         echo "<input type='number' 
             inputmode='numeric'
             pattern='\d*'
@@ -132,6 +141,32 @@ class Canvasflow_Auth_Settings {
             required>";
         echo '<br/>
         <small>Controls how long the refresh token should be valid.</small>';
+    }
+
+    public function client_id_section() {
+        $option_key = self::$option_client_id_key;
+        $value = esc_attr(get_option($option_key, ''));
+        echo "<h4>Client Id</h4>";
+        echo "<input type='text' 
+            pattern='^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+            name='{$option_key}' 
+            value='{$value}'
+            required>";
+        echo '<br/>
+        <small>Client Id provided by Canvasflow</small>';
+    }
+
+    public function secret_key_section() {
+        $option_key = self::$option_secret_key;
+        $value = esc_attr(get_option($option_key, ''));
+        echo "<h4>Secret Key</h4>";
+        echo "<input type='text' 
+            minlength='32'
+            name='{$option_key}' 
+            value='{$value}'
+            required>";
+        echo '<br/>
+        <small>Secret key provided by Canvasflow</small>';
     }
 
     public static function activate() {

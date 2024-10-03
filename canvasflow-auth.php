@@ -33,9 +33,13 @@ $plugin_name = 'canvasflow-auth';
 $settings = array(
   'major_version' => $major_version,
   'version' => $major_version.".1.0",
-  'option_role_key' => Canvasflow_Auth_Settings::$option_role_key,
-  'option_access_token_key' => Canvasflow_Auth_Settings::$option_access_token_ttl_key,
-  'option_refresh_token_key' => Canvasflow_Auth_Settings::$option_refresh_token_ttl_key,
+  'options' => [
+    'role' => Canvasflow_Auth_Settings::$option_role_key,
+    'access_token' => Canvasflow_Auth_Settings::$option_access_token_ttl_key,
+    'refresh_token' => Canvasflow_Auth_Settings::$option_refresh_token_ttl_key,
+    'client_id' => Canvasflow_Auth_Settings::$option_client_id_key,
+    'secret_key' => Canvasflow_Auth_Settings::$option_secret_key
+  ],
   'plugin_name' => $plugin_name
 );
 
