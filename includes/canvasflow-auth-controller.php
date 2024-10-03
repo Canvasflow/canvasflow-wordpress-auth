@@ -56,11 +56,11 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
             }
         ));
 
-        register_rest_route($this->namespace, '/login', array(
+        register_rest_route($this->namespace, '/authorize', array(
             'methods' => WP_REST_Server::CREATABLE,
             'callback' => array(
                 $this,
-                'auth'
+                'authorize'
             ),
             'permission_callback' => function () {
                 return true;
@@ -118,10 +118,37 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
      * @param WP_REST_Request $request Full data about the request.
      * @return WP_Error|WP_REST_Response
      */
-    public function auth($request) {
+    public function authorize($request) {
         $response = new WP_REST_Response;
         $response->set_headers(self::$headers);
         $jwt = new Canvasflow_JWT($this->settings);
+
+        $client_id = $request->get_header('X-Canvasflow-App-Key');
+        if($client_id == NULL) {
+            $response->set_data([
+                "error" => "Missing header 'X-Canvasflow-App-Key'"
+            ]);
+            $response->set_status(400);
+            return $response;
+        }
+
+        $client_id_key = $this->settings['options']['client_id'];
+        $stored_client_id = get_option($client_id_key, "");
+        if($stored_client_id == '') {
+            $response->set_data([
+                "error" => "Client Id is not set"
+            ]);
+            $response->set_status(500);
+            return $response;
+        }
+
+        if($stored_client_id != $client_id) {
+            $response->set_data([
+                "error" => "Invalid client id"
+            ]);
+            $response->set_status(409);
+            return $response;
+        }
 
         $parameters = $request->get_params();
         $username = $parameters['username'];
@@ -141,18 +168,18 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
             return $response;
         }
 
-        $entitlements = array();
-        $subscription_expiration_date = NULL;
+        $entitlements = NULL;
         if(function_exists('wcs_user_has_subscription')){
             $data = $this->auth_entitlement->get_user_entitlements($user->ID);
-            $entitlements = $data['entitlements'];
-            $subscription_expiration_date = $data['expiration_date'];
+            $entitlements = [
+                'features' => $data['entitlements'],
+                'subscription_expiration_date' => $data['expiration_date']
+            ];
         }
 
         $access_token = $jwt->get_access_token(array(
             'id' => $user->ID,
-            'entitlements' => $entitlements,
-            'subscription_expiration_date' => $subscription_expiration_date
+            'entitlements' => $entitlements
         ));
         
         $refresh_token = $jwt->get_refresh_token(array(

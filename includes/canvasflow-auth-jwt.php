@@ -24,10 +24,6 @@ class Canvasflow_JWT {
         $this->aud = $aud;
     }   
 
-    public static function validate() {
-        // TODO This function validates that the settings are setup
-    }
-
     public function get_access_token($user) {
         // Access Token is stored in minutes
         $key = $this->options['access_token'];
@@ -42,6 +38,7 @@ class Canvasflow_JWT {
         $header = $this->header;
         $payload = $this->encode(array(
             'iss' => $this->iss,
+            'amr' => 'wordpress',
             'exp' => $exp,
             'sub' => "{$user['id']}",
             'aud' => $this->aud,
