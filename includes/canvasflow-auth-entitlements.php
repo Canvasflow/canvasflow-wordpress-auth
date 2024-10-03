@@ -85,4 +85,3 @@ class Canvasflow_Auth_Entitlements {
     }   
 }
 ?>
-

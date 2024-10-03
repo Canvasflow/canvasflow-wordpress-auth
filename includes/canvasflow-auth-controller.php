@@ -3,7 +3,8 @@
 class Canvasflow_Auth_Controller extends WP_REST_Controller {
     public $version = '';
     public $namespace = '';
-    public $option_key = '';
+    public $option_role_key = '';
+    private $settings = array();
 
     public static $headers = [
         'Access-Control-Allow-Origin'   => '*',
@@ -21,9 +22,10 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
     }
 
     function __construct($settings) {
+        $this->settings = $settings;
         $plugin_name = $settings['plugin_name'];
         $this->version = $settings['version'];
-        $this->option_key = $settings['option_key'];
+        $this->option_role_key = $settings['option_role_key'];
         $this->namespace = $plugin_name."/v".$settings['major_version'];
         $this->auth_entitlement = new Canvasflow_Auth_Entitlements();
         add_action('rest_api_init', function () {
@@ -59,7 +61,7 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
             'callback' => array(
                 $this,
                 'auth'
-            ) ,
+            ),
             'permission_callback' => function () {
                 return true;
             }
@@ -103,7 +105,7 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
         $response = new WP_REST_Response;
         $response->set_data([
             "version" => $this->version,
-            'user_role' => get_option($this->option_key, '')
+            'user_role' => get_option($this->option_role_key, '')
         ]);
         $response->set_headers(self::$headers);
         $response->set_status( 200 );
@@ -119,63 +121,52 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
     public function auth($request) {
         $response = new WP_REST_Response;
         $response->set_headers(self::$headers);
+        $jwt = new Canvasflow_JWT($this->settings);
 
         $parameters = $request->get_params();
         $username = $parameters['username'];
         $password = $parameters['password'];
-		// TODO Check if the params are empty don't even process
         $login_data = [
 			'user_login' => $username,
 			'user_password' => $password
         ];
 
         $user = wp_signon($login_data, false);
-		$role = get_option($this->option_key, "");
+		$role = get_option($this->option_role_key, "");
         if (is_wp_error($user) || !in_array($role, $user->roles)) {
             $response->set_data([
-                "success" => "Y",
-                "error" => "N",
-                "response" => array(
-                    "login" => "FAIL",
-                    "digital_access" => "N"
-                )
+                "error" => "Invalid credentials"
             ]);
             $response->set_status(403);
             return $response;
         }
 
-        $date = null;
-        $digital_access = "N";
-        $raw_date=new Datetime();
-        $is_subscription = wcs_user_has_subscription( $user->ID );
-        if ($is_subscription) {
-            $subscriptions = wcs_get_users_subscriptions( $user->ID ); 
-            if (count( $subscriptions ) > 0) {
-                foreach ( $subscriptions as $sub_id => $subscription ) {
-                    if ( $subscription->get_status() == 'active' ) {
-                      $sub_info =wcs_get_subscription($sub_id );
-                      $end_date = $subscription->get_date('end');
-                      $check_date = new DateTime($end_date);
-                      if($check_date > $raw_date){
-                        $raw_date = new DateTime($end_date);
-                        $date = $raw_date->format(DateTime::ATOM);
-                        $digital_access = "Y";
-                      }
-                    }
-                }    
-            }
+        $entitlements = array();
+        $subscription_expiration_date = NULL;
+        if(function_exists('wcs_user_has_subscription')){
+            $data = $this->auth_entitlement->get_user_entitlements($user->ID);
+            $entitlements = $data['entitlements'];
+            $subscription_expiration_date = $data['expiration_date'];
         }
 
+        $access_token = $jwt->get_access_token(array(
+            'id' => $user->ID,
+            'entitlements' => $entitlements,
+            'subscription_expiration_date' => $subscription_expiration_date
+        ));
+        
+        $refresh_token = $jwt->get_refresh_token(array(
+            'id' => $user->ID
+        ));
+
+        $value = (int)esc_attr(get_option($this->settings['option_access_token_key'], 10));
+        $expires = $value * 60; 
+        
         $response->set_data([
-            "success" => "Y",
-            "error" => "N",
-            "response" => [
-                "login" => "SUCCESS",
-                "email" => $user->user_email,
-                "subscription_level" => "registered",
-                "digital_access" => $digital_access,
-                "expiration_date" => $date
-            ]
+            "access_token" => $access_token,
+            "refresh_token" => $refresh_token,
+            "token_type" => 'bearer',
+            "expires" => $expires
         ]);
         
         $response->set_status(200);
