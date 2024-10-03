@@ -73,9 +73,29 @@ class Canvasflow_JWT {
         return "{$header}.{$payload}.{$signature}";
     }
 
+    public function verify($token) {
+        list($header, $payload, $signature) = explode('.', $token);
+
+        $hash = base64_encode(hash_hmac(
+            'sha256', 
+            "{$header}.{$payload}", 
+            $this->secret,
+            true
+        ));
+
+        return $hash == $signature;
+    }
+
+    public function decode($token) {
+        list($header, $payload, $signature) = explode('.', $token);
+        return json_decode(base64_decode($payload), true);
+    }
+
+
     private function encode($data) {
         return base64_encode(json_encode($data));
     }
+
 
     private function get_signature($payload) {
         return base64_encode(hash_hmac(
