@@ -1,45 +1,43 @@
 <?php
-
-class Canvasflow_Auth_Settings {
-    public $title = "Canvasflow Auth";
-    public $menu_title = "Canvasflow Auth";
-    public $plugin_name = "";
-
-    public static $option_group = "canvasflow-settings-group";
-    public static $option_role_key = 'canvasflow_auth_role';
-    public static $option_access_token_ttl_key = 'canvasflow_access_token_ttl';
-    public static $option_refresh_token_ttl_key = 'canvasflow_refresh_token_ttl';
-    public static $option_client_id_key = 'canvasflow_client_id';
-    public static $option_secret_key = 'canvasflow_secret';
-    
-    
+/**
+ * Handles the settings for the plugin
+ *
+ */
+class CFA_Settings_Page {
     // Min TTL is 10 minutes
-    const MIN_ACCESS_TOKEN_TTL = 10; 
+    public const MIN_ACCESS_TOKEN_TTL = 10; 
     
     // Min TTL is 1 day
-    const MIN_REFRESH_TOKEN_TTL = 1;
+    public const MIN_REFRESH_TOKEN_TTL = 1;
 
-    private $auth_entitlement = null;
+    private $settings;
+    private $keys;
+    
+    public $plugin_name;
+
+    public static $title = "Canvasflow Auth";
+    public static $menu_title = "Canvasflow Auth";
     
     public static function init($settings) {
         static $plugin;
         if (!isset($plugin)) {
-            $plugin = new Canvasflow_Auth_Settings($settings);
+            $plugin = new CFA_Settings_Page($settings);
         }
         return $plugin;
     }
 
     function __construct($settings) {
-        $this->plugin_name = $settings['plugin_name'];
+        $this->plugin_name = $settings::plugin_name;
         add_action("admin_menu", [$this, "add_plugin_page"]);
         add_action("admin_init", [$this, "admin_init"]);
-        $this->auth_entitlement = new Canvasflow_Auth_Entitlements();
+        $this->settings = $settings;
+        $this->keys = CFA_Settings::$options_keys;
     }
 
     public function add_plugin_page() {
         add_options_page(
-          $this->title, // Page Title
-          $this->menu_title, // Menu Title
+          self::$title, // Page Title
+          self::$menu_title, // Menu Title
           "manage_options", // Capability
           $this->plugin_name, // Plugin Name
           [$this, "render"]
@@ -48,8 +46,8 @@ class Canvasflow_Auth_Settings {
 
     public function render() {
       $plugin_name = $this->plugin_name;
-      $option_role_key = self::$option_role_key;
-      $setting_group = self::$option_group;
+      $option_role_key = $this->keys['role'];
+      $setting_group = $this->settings::option_group;
       $selected_role = get_option($option_role_key, "");
 
       // Check if plugins are active
@@ -65,14 +63,14 @@ class Canvasflow_Auth_Settings {
     }
 
     public function admin_init() {
-        $option_group = self::$option_group;
+        $option_group = $this->settings::option_group;
 
         // Register settings
-        register_setting($option_group, self::$option_role_key);
-        register_setting($option_group, self::$option_access_token_ttl_key);
-        register_setting($option_group, self::$option_refresh_token_ttl_key);
-        register_setting($option_group, self::$option_client_id_key);
-        register_setting($option_group, self::$option_secret_key);
+        register_setting($option_group, $this->keys['role']);
+        register_setting($option_group, $this->keys['access_token']);
+        register_setting($option_group, $this->keys['refresh_token']);
+        register_setting($option_group, $this->keys['client_id']);
+        register_setting($option_group, $this->keys['secret']);
 
         add_settings_section(
           $option_group, 
@@ -95,10 +93,10 @@ class Canvasflow_Auth_Settings {
     }
 
     public function user_role_section() {
-        $option_key = self::$option_role_key;
-        $setting = esc_attr(get_option($option_key));
+        $key = CFA_Settings::$options_keys['role'];
+        $setting = esc_attr(get_option($key));
         echo "<h3>User Role</h3>";
-        echo "<select name='{$option_key}' id='user-role'>";
+        echo "<select name='{$key}' id='user-role'>";
         echo wp_dropdown_roles($setting);
         echo "</select>";
         echo '<br/>
@@ -110,15 +108,15 @@ class Canvasflow_Auth_Settings {
     }
 
     public function access_token_ttl_section() {
-        $option_key = self::$option_access_token_ttl_key;
+        $key = CFA_Settings::$options_keys['access_token'];
         $default_ttl = self::MIN_ACCESS_TOKEN_TTL;
-        $value = esc_attr(get_option($option_key, $default_ttl));
+        $value = esc_attr(get_option($key, $default_ttl));
         echo "<h4>Access Token TTL</h4>";
         echo "<input type='number' 
             inputmode='numeric'
             pattern='\d*'
             step='1'
-            name='{$option_key}' 
+            name='{$key}' 
             value='{$value}' 
             min='{$default_ttl}'
             required>";
@@ -127,15 +125,15 @@ class Canvasflow_Auth_Settings {
     }
 
     public function refresh_token_ttl_section() {
-        $option_key = self::$option_refresh_token_ttl_key;
+        $key = CFA_Settings::$options_keys['refresh_token'];
         $default_ttl = self::MIN_REFRESH_TOKEN_TTL;
-        $value = esc_attr(get_option($option_key, $default_ttl));
+        $value = esc_attr(get_option($key, $default_ttl));
         echo "<h4>Refresh Token TTL</h4>";
         echo "<input type='number' 
             inputmode='numeric'
             pattern='\d*'
             step='1'
-            name='{$option_key}' 
+            name='{$key}' 
             value='{$value}' 
             min='{$default_ttl}'
             required>";
@@ -144,12 +142,12 @@ class Canvasflow_Auth_Settings {
     }
 
     public function client_id_section() {
-        $option_key = self::$option_client_id_key;
-        $value = esc_attr(get_option($option_key, ''));
+        $key = CFA_Settings::$options_keys['client_id'];
+        $value = esc_attr(get_option($key, ''));
         echo "<h4>Client Id</h4>";
         echo "<input type='text' 
             pattern='^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
-            name='{$option_key}' 
+            name='{$key}' 
             value='{$value}'
             required>";
         echo '<br/>
@@ -157,12 +155,12 @@ class Canvasflow_Auth_Settings {
     }
 
     public function secret_key_section() {
-        $option_key = self::$option_secret_key;
-        $value = esc_attr(get_option($option_key, ''));
+        $key = CFA_Settings::$options_keys['secret'];
+        $value = esc_attr(get_option($key, ''));
         echo "<h4>Secret Key</h4>";
         echo "<input type='text' 
             minlength='32'
-            name='{$option_key}' 
+            name='{$key}' 
             value='{$value}'
             required>";
         echo '<br/>
@@ -170,26 +168,27 @@ class Canvasflow_Auth_Settings {
     }
 
     public static function activate() {
-        $option_role_key = self::$option_role_key;
+        $key = CFA_Settings::$options_keys['role'];
         $available_roles = [];
         $get_all_roles = wp_roles()->roles;
         foreach ($get_all_roles as $k => $v) {
             array_push($available_roles, $k);
         }
 
-        if ("" === get_option($option_role_key, "")) {
+        if ("" === get_option($key, "")) {
             if (in_array(AUTH_DEFAULT_ROLE, $available_roles)) {
-                add_option($option_role_key, AUTH_DEFAULT_ROLE);
+                add_option($key, AUTH_DEFAULT_ROLE);
                 return;
             }
-            add_option($option_role_key, array_shift($available_roles));
+            add_option($key, array_shift($available_roles));
         }
     }
 
     public static function uninstall() {
-        $option_role_key = self::$option_role_key;
-        if ("" === get_option($option_role_key, "")) {
-            delete_option($option_role_key);
+        foreach (CFA_Settings::$options_keys as $key => $value) {
+            if ("" === get_option($key, "")) {
+                delete_option($key);
+            }
         }
     }
 }

@@ -3,7 +3,7 @@
  * Handles the entitlement for the user
  *
  */
-class Canvasflow_Auth_Entitlements {
+class CFA_Entitlements {
     /**
      * Get entitlement from the user
      *

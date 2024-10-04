@@ -3,55 +3,54 @@
  * Control data related to JWT Tokens
  *
  */
-class Canvasflow_JWT {
-     /**
+class CFA_JWT {
+    /**
      * Secret stored in settings
      * @var string
      */
     private $secret;
 
-     /**
+    /**
      * Header for the token
      * @var string
      */
     private $header;
 
-     /**
+    /**
      * Issuer for the token
      * @var string
      */
     private $iss;
 
-     /**
+    /**
      * Audience for the token
      * @var string
      */
     private $aud;
 
-     /**
+    /**
      * Options for the plugin
      * @var array
      */
-    private $options;
+    private $keys;
 
     /**
      * Initialize the JWT
      *
-     * @param array $settings Settings for the plugin
      */
-    function __construct($settings) {
+    function __construct() {
         $this->header = $this->encode(array(
             'typ' => 'JWT',
             'alg' => 'HS256'
         ));
         $this->iss = $_SERVER['SERVER_NAME'];
+
+        $keys = CFA_Settings::$options_keys;
         
-        $options = $settings['options'];
-        $this->options = $options;
+        $secret = esc_attr(get_option($keys['secret'], ''));
+        $aud = esc_attr(get_option($keys['client_id'], ''));
 
-        $secret = esc_attr(get_option($options['secret_key'], ''));
-        $aud = esc_attr(get_option($options['client_id'], ''));
-
+        $this->keys = $keys;
         $this->secret = $secret;
         $this->aud = $aud;
     }   
@@ -64,7 +63,7 @@ class Canvasflow_JWT {
      */
     public function get_access_token($user) {
         // Access Token is stored in minutes
-        $key = $this->options['access_token'];
+        $key = $this->keys['access_token'];
         $value = (int)esc_attr(get_option($key, 10));
         
         // Transform minutes to seconds
@@ -96,7 +95,7 @@ class Canvasflow_JWT {
      */
     public function get_refresh_token($user) {
         // Refresh Token is stored in days
-        $key = $this->options['refresh_token'];
+        $key = $this->keys['refresh_token'];
         $value = (int)esc_attr(get_option($key, 1));
         
         // Transform days to seconds

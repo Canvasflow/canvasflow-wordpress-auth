@@ -1,10 +1,9 @@
 <?php
 
-class Canvasflow_Auth_Controller extends WP_REST_Controller {
-    public $version = '';
-    public $namespace = '';
-    public $option_role_key = '';
-    private $settings = array();
+class CFA_Controller extends WP_REST_Controller {
+    public $version;
+    public $namespace;
+    private $keys;
 
     public static $headers = [
         'Access-Control-Allow-Origin'   => '*',
@@ -16,18 +15,20 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
     public static function init($role) {
         static $plugin;
         if (!isset($plugin)) {
-            $plugin = new Canvasflow_Auth_Controller($role);
+            $plugin = new CFA_Controller($role);
         }
         return $plugin;
     }
 
     function __construct($settings) {
-        $this->settings = $settings;
-        $plugin_name = $settings['plugin_name'];
-        $this->version = $settings['version'];
-        $this->option_role_key = $settings['options']['role'];
-        $this->namespace = $plugin_name.'/v'.$settings['major_version'];
-        $this->auth_entitlement = new Canvasflow_Auth_Entitlements();
+        $keys = CFA_Settings::$options_keys;
+        $major_version = $settings::major_version;
+        $plugin_name = $settings::plugin_name;;
+        
+        $this->version = $settings->version;
+        $this->namespace = $plugin_name.'/v'.$major_version;
+        $this->keys = $keys;
+        $this->auth_entitlement = new CFA_Entitlements();
         add_action('rest_api_init', function () {
             $this->register();
         });
@@ -124,7 +125,7 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
     public function authorize($request) {
         $response = new WP_REST_Response;
         $response->set_headers(self::$headers);
-        $jwt = new Canvasflow_JWT($this->settings);
+        $jwt = new CFA_JWT();
 
         $r = $this->validate_request($request);
         if($r != NULL) {
@@ -174,7 +175,7 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
     public function refresh_token($request) {
         $response = new WP_REST_Response;
         $response->set_headers(self::$headers);
-        $jwt = new Canvasflow_JWT($this->settings);
+        $jwt = new CFA_JWT();
 
         $r = $this->validate_request($request);
         if($r != NULL) {
@@ -257,7 +258,7 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
             return $response;
         }
 
-        $client_id_key = $this->settings['options']['client_id'];
+        $client_id_key = $this->keys['client_id'];
         $stored_client_id = get_option($client_id_key, "");
         if($stored_client_id == '') {
             $response->set_data([
@@ -293,7 +294,7 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
         $user = get_user_by('id', $user_id);
         $response = new WP_REST_Response;
         $response->set_headers(self::$headers);
-        $role = get_option($this->option_role_key, "");
+        $role = get_option($this->keys['role'], "");
         if ($user == false) {
             $response->set_data([
                 'error' => 'The user does not exist',
@@ -318,115 +319,16 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
      * Get the entitlement data from the user
      *
      * @param integer $user_id Identifier for the user
-     * @return TokenData
+     * @return CFA_Token_Data
      */
     private function get_token_from_user($user_id, $jwt) {
-        $token = new TokenData(
+        $token = new CFA_Token_Data(
             $user_id,
             $jwt,
-            $this->auth_entitlement,
-            $this->settings
+            $this->auth_entitlement
         );
         $token->build();
         return $token;
-    }
-}
-
-
-/**
- * Get token data based on a user
- *
- */
-
-class TokenData {
-     /**
-     * Stores the access token
-     * @var string
-     */
-    public $access = '';
-
-    /**
-     * Stores the refresh token
-     * @var string
-     */
-    public $refresh = '';
-    
-    /**
-     * Stores the amount of time for the access token to expire
-     * @var integer
-     */
-    public $expires = 0;
-
-    /**
-     * Handles the user identifier
-     * @var integer
-     */
-    private $user_id;
-
-    /**
-     * Handles the features and subscription end date for the user
-     * @var array
-     */
-    private $entitlement;
-
-    /**
-     * Stores utility functions for handling tokens
-     * @var Canvasflow_JWT
-     */
-    private $jwt;
-
-    /**
-     * Stores the settings for the plugin
-     * @var array
-     */
-    private $settings;
-
-    /**
-     * Initialize the token data
-     * 
-     *
-     * @param integer $user_id Identifier for the user
-     * @param Canvasflow_JWT $jwt
-     * @param Canvasflow_Auth_Entitlements $entitlement
-     * @param array $settings Settings for the plugin
-     */
-    function __construct($user_id, $jwt, $entitlement,  $settings) {
-        $this->user_id = $user_id;
-        $this->entitlement = $entitlement;
-        $this->jwt = $jwt;
-        $this->settings = $settings;
-    }
-
-    /**
-     * Builds the data for the token and stores it in the public attributes
-     * 
-     */
-    function build() {
-        $entitlements = NULL;
-        if(function_exists('wcs_user_has_subscription')){
-            $data = $this->entitlement->get_user_entitlements($user_id);
-            $entitlements = [
-                'features' => $data['entitlements'],
-                'subscription_expiration_date' => $data['expiration_date']
-            ];
-        }
-
-        $access_token = $this->jwt->get_access_token(array(
-            'id' => $this->user_id,
-            'entitlements' => $entitlements
-        ));
-        
-        $refresh_token = $this->jwt->get_refresh_token(array(
-            'id' => $this->user_id
-        ));
-
-        $value = (int)esc_attr(get_option(
-            $this->settings['options']['access_token'], 10)
-        );
-
-        $this->access = $access_token;
-        $this->refresh = $refresh_token;
-        $this->expires =  $value * 60;
     }
 }
 ?>

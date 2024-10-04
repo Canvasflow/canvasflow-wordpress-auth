@@ -22,43 +22,40 @@
 define('AUTH_DEFAULT_ROLE', 'subscriber');
 
 $dir_path = plugin_dir_path(__FILE__);
-require_once ($dir_path.'includes/canvasflow-auth-jwt.php');
-require_once ($dir_path.'includes/canvasflow-auth-entitlements.php');
-require_once($dir_path.'includes/canvasflow-auth-controller.php');
-require_once ($dir_path.'includes/canvasflow-auth-settings.php');
+require_once ($dir_path.'includes/class-cfa-settings.php');
+require_once ($dir_path.'includes/class-cfa-jwt.php');
+require_once ($dir_path.'includes/class-cfa-entitlements.php');
+require_once ($dir_path.'includes/class-cfa-token-data.php');
+require_once($dir_path.'includes/class-cfa-controller.php');
+require_once ($dir_path.'includes/class-cfa-settings-page.php');
 
-$major_version = 1;
-$plugin_name = 'canvasflow-auth';
+$settings = new CFA_Settings();
 
-$settings = array(
-  'major_version' => $major_version,
-  'version' => $major_version.".0.0",
-  'options' => [
-    'role' => Canvasflow_Auth_Settings::$option_role_key,
-    'access_token' => Canvasflow_Auth_Settings::$option_access_token_ttl_key,
-    'refresh_token' => Canvasflow_Auth_Settings::$option_refresh_token_ttl_key,
-    'client_id' => Canvasflow_Auth_Settings::$option_client_id_key,
-    'secret_key' => Canvasflow_Auth_Settings::$option_secret_key
-  ],
-  'plugin_name' => $plugin_name
-);
+$major_version = $settings::major_version;
+$plugin_name = $settings::plugin_name;
 
-Canvasflow_Auth_Settings::init($settings);
-Canvasflow_Auth_Controller::init($settings);
+CFA_Settings_Page::init($settings);
+CFA_Controller::init($settings);
 
 register_activation_hook(__FILE__, 'on_activate');
 register_uninstall_hook(__FILE__, 'on_uninstall');
 
+/**
+ * Triggers the function when the plugin is activated
+ */
 function on_activate(){
     register_uninstall_hook(__FILE__, array(
-        'Canvasflow_Auth_Settings',
+        'CFA_Settings_Page',
         'activate'
     ));
 }
 
+/**
+ * Triggers the function when the plugin is uninstalled
+ */
 function on_uninstall(){
     register_uninstall_hook(__FILE__, array(
-        'Canvasflow_Auth_Settings',
+        'CFA_Settings_Page',
         'uninstall'
     ));
 }
