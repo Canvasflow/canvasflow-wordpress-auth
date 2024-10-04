@@ -1,12 +1,45 @@
 <?php 
-
+/**
+ * Control data related to JWT Tokens
+ *
+ */
 class Canvasflow_JWT {
-    private $secret = '';
-    private $header = array();
-    private $iss = '';
-    private $aud = '';
-    private $options = array();
+     /**
+     * Secret stored in settings
+     * @var string
+     */
+    private $secret;
 
+     /**
+     * Header for the token
+     * @var string
+     */
+    private $header;
+
+     /**
+     * Issuer for the token
+     * @var string
+     */
+    private $iss;
+
+     /**
+     * Audience for the token
+     * @var string
+     */
+    private $aud;
+
+     /**
+     * Options for the plugin
+     * @var string
+     */
+    private $options;
+
+    /**
+     * Initialize the JWT
+     * 
+     *
+     * @param array $settings Settings for the plugin
+     */
     function __construct($settings) {
         $this->header = $this->encode(array(
             'typ' => 'JWT',
@@ -24,6 +57,12 @@ class Canvasflow_JWT {
         $this->aud = $aud;
     }   
 
+    /**
+     * Get access token from the user
+     * 
+     * @param array $user
+     * @return string
+     */
     public function get_access_token($user) {
         // Access Token is stored in minutes
         $key = $this->options['access_token'];
@@ -50,6 +89,12 @@ class Canvasflow_JWT {
         return "{$header}.{$payload}.{$signature}";
     }
 
+    /**
+     * Get refresh token from the user
+     * 
+     * @param array $user
+     * @return string
+     */
     public function get_refresh_token($user) {
         // Refresh Token is stored in days
         $key = $this->options['refresh_token'];
@@ -73,6 +118,12 @@ class Canvasflow_JWT {
         return "{$header}.{$payload}.{$signature}";
     }
 
+    /**
+     * Validates if the token is valid
+     * 
+     * @param string $token
+     * @return boolean
+     */
     public function verify($token) {
         list($header, $payload, $signature) = explode('.', $token);
 
@@ -86,15 +137,33 @@ class Canvasflow_JWT {
         return $hash == $signature;
     }
 
+    /**
+     * Decode data from the token
+     * 
+     * @param string $token
+     * @return array
+     */
     public function decode($token) {
         list($header, $payload, $signature) = explode('.', $token);
         return json_decode(base64_decode($payload), true);
     }
 
+    /**
+     * Enconde data into a base64 json string 
+     * 
+     * @param array $data
+     * @return string
+     */
     private function encode($data) {
         return base64_encode(json_encode($data));
     }
 
+    /**
+     * Get signature for the payload
+     * 
+     * @param string $payload Data in base64 format
+     * @return string
+     */
     private function get_signature($payload) {
         return base64_encode(hash_hmac(
             'sha256', 

@@ -286,7 +286,7 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
      * This function validates that the user exist and have the required
      * roles to access the content.
      *
-     * @param Number $user_id Identifier for the user
+     * @param integer $user_id Identifier for the user
      * @return WP_REST_Response|NULL
      */
     private function validate_user($user_id) {
@@ -315,11 +315,9 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
     }
 
      /**
-     * Get token data from user
-     * 
      * Get the entitlement data from the user
      *
-     * @param Number $user_id Identifier for the user
+     * @param integer $user_id Identifier for the user
      * @return TokenData
      */
     private function get_token_from_user($user_id, $jwt) {
@@ -333,6 +331,12 @@ class Canvasflow_Auth_Controller extends WP_REST_Controller {
         return $token;
     }
 }
+
+
+/**
+ * Get token data based on a user
+ *
+ */
 
 class TokenData {
      /**
@@ -349,13 +353,13 @@ class TokenData {
     
     /**
      * Stores the amount of time for the access token to expire
-     * @var int
+     * @var integer
      */
     public $expires = 0;
 
     /**
      * Handles the user identifier
-     * @var int
+     * @var integer
      */
     private $user_id;
 
@@ -378,10 +382,10 @@ class TokenData {
     private $settings;
 
     /**
-     * Create a class that gets entitlement data from user as tokens
+     * Initialize the token data
      * 
      *
-     * @param Number $user_id Identifier for the user
+     * @param integer $user_id Identifier for the user
      * @param Canvasflow_JWT $jwt
      * @param Canvasflow_Auth_Entitlements $entitlement
      * @param array $settings Settings for the plugin
