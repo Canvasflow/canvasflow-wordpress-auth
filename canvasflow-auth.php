@@ -26,13 +26,10 @@ require_once ($dir_path.'includes/class-cfa-settings.php');
 require_once ($dir_path.'includes/class-cfa-jwt.php');
 require_once ($dir_path.'includes/class-cfa-entitlements.php');
 require_once ($dir_path.'includes/class-cfa-token-data.php');
-require_once($dir_path.'includes/class-cfa-controller.php');
+require_once ($dir_path.'includes/class-cfa-controller.php');
 require_once ($dir_path.'includes/class-cfa-settings-page.php');
 
 $settings = new CFA_Settings();
-
-$major_version = $settings::major_version;
-$plugin_name = $settings::plugin_name;
 
 CFA_Settings_Page::init($settings);
 CFA_Controller::init($settings);

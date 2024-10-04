@@ -1,26 +1,65 @@
 <?php
-
+/**
+ * Class that controls the API endpoints
+ *
+ */
 class CFA_Controller extends WP_REST_Controller {
+    /**
+     * Makes accessible the version of the plugin 
+     * @var string
+     */
     public $version;
+
+    /**
+     * Namespace used by the endpoints
+     * @var string
+     */
     public $namespace;
+
+    /**
+     * Stores the key/values for the options stored in settings 
+     * @var array
+     */
     private $keys;
+
+    /**
+     * Name of the plugin
+     * @var string
+     */
     private $plugin_name;
 
+    /**
+     * Handles the data related to the user entitlements
+     * @var CFA_Entitlements
+     */
+    public $entitlement = null;
+
+    /**
+     * Headers that enable CORS
+     * @var array
+     */
     public static $headers = [
         'Access-Control-Allow-Origin'   => '*',
         'Access-Control-Allow-Methods' => 'POST, GET, OPTIONS',
     ];
 
-    public $auth_entitlement = null;
-
-    public static function init($role) {
+    /**
+     * Initializer for the class
+     * @param CFA_Settings $settings
+     * @return CFA_Controller
+     */
+    public static function init($settings) {
         static $plugin;
         if (!isset($plugin)) {
-            $plugin = new CFA_Controller($role);
+            $plugin = new CFA_Controller($settings);
         }
         return $plugin;
     }
 
+    /**
+     * Initializer the controller
+     * @param CFA_Settings $settings
+     */
     function __construct($settings) {
         $keys = CFA_Settings::$options_keys;
         $major_version = $settings::major_version;
@@ -29,7 +68,7 @@ class CFA_Controller extends WP_REST_Controller {
         $this->version = $settings->version;
         $this->namespace = $plugin_name.'/v'.$major_version;
         $this->keys = $keys;
-        $this->auth_entitlement = new CFA_Entitlements();
+        $this->entitlement = new CFA_Entitlements();
         add_action('rest_api_init', function () {
             $this->register();
         });
@@ -91,7 +130,7 @@ class CFA_Controller extends WP_REST_Controller {
         return $response;
     }
 
-     /**
+    /**
      * Health Check endpoint
      *
      * @param WP_REST_Request $request Full data about the request.
@@ -224,7 +263,7 @@ class CFA_Controller extends WP_REST_Controller {
         return $response;
     }
 
-     /**
+    /**
      * Validate Request function
      * 
      * This function validates that the user send all the required 
@@ -272,7 +311,7 @@ class CFA_Controller extends WP_REST_Controller {
         return NULL;
     }
 
-     /**
+    /**
      * Validate User Function
      * 
      * This function validates that the user exist and have the required
@@ -306,7 +345,7 @@ class CFA_Controller extends WP_REST_Controller {
         return NULL;
     }
 
-     /**
+    /**
      * Get the entitlement data from the user
      *
      * @param integer $user_id Identifier for the user
@@ -316,7 +355,7 @@ class CFA_Controller extends WP_REST_Controller {
         $token = new CFA_Token_Data(
             $user_id,
             $jwt,
-            $this->auth_entitlement
+            $this->entitlement
         );
         $token->build();
         return $token;

@@ -5,7 +5,7 @@
  */
 class CFA_Entitlements {
     /**
-     * Get entitlement from the user
+     * Get entitlements based on the user id
      *
      * @param integer $user_id
      * @param array
@@ -16,17 +16,17 @@ class CFA_Entitlements {
         $expiration_date = $this->get_nearest_expiration_date($subscriptions);
         $features = $this->get_features($subscriptions);
 
-        return array(
+        return [
             'entitlements' => $features,
             'expiration_date' =>$expiration_date,
-        );
+        ];
     }
 
     /**
      * Get valid subscriptions from a user
      *
      * @param integer $user_id
-     * @param WC_Subscription[]
+     * @return WC_Subscription[]
      */
     private function get_valid_subscriptions($user_id) {
         $valid_subscriptions = array();
