@@ -6,48 +6,56 @@
 class CFA_Settings_Page {
     /**
      * Stores the default TTL for access token (minutes)
+     * 
      * @var number
      */
     public const MIN_ACCESS_TOKEN_TTL = 10; 
     
     /**
      * Stores the default TTL for refresh token (day)
+     * 
      * @var number
      */
     public const MIN_REFRESH_TOKEN_TTL = 1;
 
     /**
      * Stores the key/values for the options stored in settings 
+     * 
      * @var array
      */
     private $keys;
     
     /**
      * Name of the plugin
+     * 
      * @var string
      */
     public $plugin_name;
 
     /**
      * Title of the settings page
+     * 
      * @var string
      */
     public static $title = "Canvasflow Auth";
 
     /**
      * Title of the menu page
+     * 
      * @var string
      */
     public static $menu_title = "Canvasflow Auth";
 
     /**
      * Stores the plugin settings
+     * 
      * @var CFA_Settings
      */
     private $settings;
     
     /**
      * Initializer for the class
+     * 
      * @param CFA_Settings $settings
      * @return CFA_Settings_Page
      */
@@ -61,6 +69,7 @@ class CFA_Settings_Page {
 
     /**
      * Initializer the settings page
+     * 
      * @param CFA_Settings $settings
      */
     function __construct($settings) {

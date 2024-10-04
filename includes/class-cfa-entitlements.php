@@ -29,7 +29,7 @@ class CFA_Entitlements {
      * @return WC_Subscription[]
      */
     private function get_valid_subscriptions($user_id) {
-        $valid_subscriptions = array();
+        $valid_subscriptions = [];
         $has_subscription = wcs_user_has_subscription($user_id);
         if(!$has_subscription) {
             return $valid_subscriptions;
@@ -78,7 +78,7 @@ class CFA_Entitlements {
      * @return string[]
      */
     private function get_features($subscriptions) {
-        $entitlements = array();
+        $entitlements = [];
         if(count($subscriptions) == 0) {
             return $entitlements;
         }   
@@ -100,7 +100,7 @@ class CFA_Entitlements {
      * @return string[]
      */
     private function get_tags($subscription) {
-        $response = array();
+        $response = [];
         if (sizeof($subscription_items = $subscription->get_items()) == 0) {
             return $response;
         }

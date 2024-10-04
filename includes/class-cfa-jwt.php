@@ -6,30 +6,35 @@
 class CFA_JWT {
     /**
      * Secret stored in settings
+     * 
      * @var string
      */
     private $secret;
 
     /**
      * Header for the token
+     * 
      * @var string
      */
     private $header;
 
     /**
      * Issuer for the token
+     * 
      * @var string
      */
     private $iss;
 
     /**
      * Audience for the token
+     * 
      * @var string
      */
     private $aud;
 
     /**
      * Options for the plugin
+     * 
      * @var array
      */
     private $keys;

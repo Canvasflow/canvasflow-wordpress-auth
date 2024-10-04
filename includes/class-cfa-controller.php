@@ -6,36 +6,42 @@
 class CFA_Controller extends WP_REST_Controller {
     /**
      * Makes accessible the version of the plugin 
+     * 
      * @var string
      */
     public $version;
 
     /**
      * Namespace used by the endpoints
+     * 
      * @var string
      */
     public $namespace;
 
     /**
      * Stores the key/values for the options stored in settings 
+     * 
      * @var array
      */
     private $keys;
 
     /**
      * Name of the plugin
+     * 
      * @var string
      */
     private $plugin_name;
 
     /**
      * Handles the data related to the user entitlements
+     * 
      * @var CFA_Entitlements
      */
     public $entitlement = null;
 
     /**
      * Headers that enable CORS
+     * 
      * @var array
      */
     public static $headers = [
@@ -45,6 +51,7 @@ class CFA_Controller extends WP_REST_Controller {
 
     /**
      * Initializer for the class
+     * 
      * @param CFA_Settings $settings
      * @return CFA_Controller
      */
@@ -58,6 +65,7 @@ class CFA_Controller extends WP_REST_Controller {
 
     /**
      * Initializer the controller
+     * 
      * @param CFA_Settings $settings
      */
     function __construct($settings) {
@@ -84,7 +92,7 @@ class CFA_Controller extends WP_REST_Controller {
             'callback' => array(
                 $this,
                 'health_check'
-            ) ,
+            ),
             'permission_callback' => function () {
                 return true;
             }
@@ -131,7 +139,7 @@ class CFA_Controller extends WP_REST_Controller {
     }
 
     /**
-     * Health Check endpoint
+     * Plugin information Endpoint
      *
      * @param WP_REST_Request $request Full data about the request.
      * @return WP_Error|WP_REST_Response
@@ -147,7 +155,7 @@ class CFA_Controller extends WP_REST_Controller {
     }
 
     /**
-     * Authentication Endpoint
+     * Authorize Endpoint
      *
      * @param WP_REST_Request $request Full data about the request.
      * @return WP_Error|WP_REST_Response
