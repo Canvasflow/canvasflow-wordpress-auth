@@ -4,6 +4,7 @@ class CFA_Controller extends WP_REST_Controller {
     public $version;
     public $namespace;
     private $keys;
+    private $plugin_name;
 
     public static $headers = [
         'Access-Control-Allow-Origin'   => '*',
@@ -50,16 +51,6 @@ class CFA_Controller extends WP_REST_Controller {
             }
         ));
 
-        register_rest_route($this->namespace, '/info', array(
-            'methods' => WP_REST_Server::READABLE,
-            'callback' => array(
-                $this,
-                'info'
-            ) ,
-            'permission_callback' => function () {
-                return true;
-            }
-        ));
 
         register_rest_route($this->namespace, '/authorize', array(
             'methods' => WP_REST_Server::CREATABLE,

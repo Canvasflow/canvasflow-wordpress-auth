@@ -43,7 +43,6 @@ class CFA_Token_Data {
    /**
     * Initialize the token data
     * 
-    *
     * @param integer $user_id Identifier for the user
     * @param CFA_JWT $jwt
     * @param CFA_Entitlements $entitlement
