@@ -66,7 +66,7 @@ class CFA_Token_Data {
     function build() {
         $entitlements = NULL;
         if(function_exists('wcs_user_has_subscription')){
-            $data = $this->entitlement->get_user_entitlements($user_id);
+            $data = $this->entitlement->get_user_entitlements($this->user_id);
             $entitlements = [
                 'features' => $data['entitlements'],
                 'subscription_expiration_date' => $data['expiration_date']

@@ -37,7 +37,7 @@ class CFA_Controller extends WP_REST_Controller {
      * 
      * @var CFA_Entitlements
      */
-    public $entitlement = null;
+    public $entitlement;
 
     /**
      * Headers that enable CORS
@@ -194,11 +194,12 @@ class CFA_Controller extends WP_REST_Controller {
         }
 
         $token = $this->get_token_from_user($user->ID, $jwt);
+
         $response->set_data([
             'access_token' => $token->access,
             'refresh_token' => $token->refresh,
             'token_type' => 'bearer',
-            'expires' => $token->expires
+            'expires' => $token->expires,
         ]);
         $response->set_status(200);
         return $response;
