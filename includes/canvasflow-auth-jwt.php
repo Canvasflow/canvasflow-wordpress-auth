@@ -91,11 +91,9 @@ class Canvasflow_JWT {
         return json_decode(base64_decode($payload), true);
     }
 
-
     private function encode($data) {
         return base64_encode(json_encode($data));
     }
-
 
     private function get_signature($payload) {
         return base64_encode(hash_hmac(
