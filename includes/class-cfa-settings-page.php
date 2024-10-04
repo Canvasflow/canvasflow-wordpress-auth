@@ -4,20 +4,53 @@
  *
  */
 class CFA_Settings_Page {
-    // Min TTL is 10 minutes
+    /**
+     * Stores the default TTL for access token (minutes)
+     * @var number
+     */
     public const MIN_ACCESS_TOKEN_TTL = 10; 
     
-    // Min TTL is 1 day
+    /**
+     * Stores the default TTL for refresh token (day)
+     * @var number
+     */
     public const MIN_REFRESH_TOKEN_TTL = 1;
 
-    private $settings;
+    /**
+     * Stores the key/values for the options stored in settings 
+     * @var array
+     */
     private $keys;
     
+    /**
+     * Name of the plugin
+     * @var string
+     */
     public $plugin_name;
 
+    /**
+     * Title of the settings page
+     * @var string
+     */
     public static $title = "Canvasflow Auth";
+
+    /**
+     * Title of the menu page
+     * @var string
+     */
     public static $menu_title = "Canvasflow Auth";
+
+    /**
+     * Stores the plugin settings
+     * @var CFA_Settings
+     */
+    private $settings;
     
+    /**
+     * Initializer for the class
+     * @param CFA_Settings $settings
+     * @return CFA_Settings_Page
+     */
     public static function init($settings) {
         static $plugin;
         if (!isset($plugin)) {
@@ -26,6 +59,10 @@ class CFA_Settings_Page {
         return $plugin;
     }
 
+    /**
+     * Initializer the settings page
+     * @param CFA_Settings $settings
+     */
     function __construct($settings) {
         $this->plugin_name = $settings::plugin_name;
         add_action("admin_menu", [$this, "add_plugin_page"]);
@@ -34,6 +71,10 @@ class CFA_Settings_Page {
         $this->keys = CFA_Settings::$options_keys;
     }
 
+    /**
+     * Adds the plugin page to the menu
+     * 
+     */
     public function add_plugin_page() {
         add_options_page(
           self::$title, // Page Title
@@ -44,6 +85,32 @@ class CFA_Settings_Page {
         );
     }
 
+    /**
+     * Add the page to the settings section
+     * 
+     */
+    public function admin_init() {
+        $option_group = $this->settings::option_group;
+
+        // Register settings
+        register_setting($option_group, $this->keys['role']);
+        register_setting($option_group, $this->keys['access_token']);
+        register_setting($option_group, $this->keys['refresh_token']);
+        register_setting($option_group, $this->keys['client_id']);
+        register_setting($option_group, $this->keys['secret']);
+
+        add_settings_section(
+          $option_group, 
+          __("") , 
+          [$this, "display_application_settings_page"], 
+          $this->plugin_name
+        );
+    }
+
+    /**
+     * Renders the page for the setting section
+     * 
+     */
     public function render() {
       $plugin_name = $this->plugin_name;
       $option_role_key = $this->keys['role'];
@@ -62,26 +129,12 @@ class CFA_Settings_Page {
       include plugin_dir_path(__FILE__) . "views/canvasflow-auth-view.php";
     }
 
-    public function admin_init() {
-        $option_group = $this->settings::option_group;
-
-        // Register settings
-        register_setting($option_group, $this->keys['role']);
-        register_setting($option_group, $this->keys['access_token']);
-        register_setting($option_group, $this->keys['refresh_token']);
-        register_setting($option_group, $this->keys['client_id']);
-        register_setting($option_group, $this->keys['secret']);
-
-        add_settings_section(
-          $option_group, 
-          __("") , 
-          [$this, "application_settings_section"], 
-          $this->plugin_name
-        );
-    }
-
-    public function application_settings_section() {
-        $this->user_role_section();
+    /**
+     * Prints the html for the page
+     * 
+     */
+    public function display_application_settings_page() {
+        $this->display_user_role_section();
         echo "<br/>";
         echo "<h3>Token Configuration</h3>";
         $this->access_token_ttl_section();
@@ -92,7 +145,11 @@ class CFA_Settings_Page {
         $this->secret_key_section();
     }
 
-    public function user_role_section() {
+    /**
+     * Displays the user role selection
+     * 
+     */
+    public function display_user_role_section() {
         $key = CFA_Settings::$options_keys['role'];
         $setting = esc_attr(get_option($key));
         echo "<h3>User Role</h3>";
@@ -107,6 +164,10 @@ class CFA_Settings_Page {
         </small>';
     }
 
+    /**
+     * Display the access token ttl section
+     * 
+     */
     public function access_token_ttl_section() {
         $key = CFA_Settings::$options_keys['access_token'];
         $default_ttl = self::MIN_ACCESS_TOKEN_TTL;
@@ -121,9 +182,14 @@ class CFA_Settings_Page {
             min='{$default_ttl}'
             required>";
         echo '<br/>
-        <small>Controls how long the token should be valid.</small>';
+        <small>Controls how long the token should be valid. 
+        <em>(In minutes)</em></small>';
     }
 
+    /**
+     * Display the refresh token ttl section
+     * 
+     */
     public function refresh_token_ttl_section() {
         $key = CFA_Settings::$options_keys['refresh_token'];
         $default_ttl = self::MIN_REFRESH_TOKEN_TTL;
@@ -138,9 +204,14 @@ class CFA_Settings_Page {
             min='{$default_ttl}'
             required>";
         echo '<br/>
-        <small>Controls how long the refresh token should be valid.</small>';
+        <small>Controls how long the refresh token should be valid.
+        <em>(In days)</em></small>';
     }
 
+    /**
+     * Display the canvasflow client id section
+     * 
+     */
     public function client_id_section() {
         $key = CFA_Settings::$options_keys['client_id'];
         $value = esc_attr(get_option($key, ''));
@@ -154,6 +225,10 @@ class CFA_Settings_Page {
         <small>Client Id provided by Canvasflow</small>';
     }
 
+    /**
+     * Display the canvasflow secret key section
+     * 
+     */
     public function secret_key_section() {
         $key = CFA_Settings::$options_keys['secret'];
         $value = esc_attr(get_option($key, ''));
@@ -167,6 +242,10 @@ class CFA_Settings_Page {
         <small>Secret key provided by Canvasflow</small>';
     }
 
+    /**
+     * Stablish default values when the page gets activated
+     * 
+     */
     public static function activate() {
         $key = CFA_Settings::$options_keys['role'];
         $available_roles = [];
@@ -184,6 +263,10 @@ class CFA_Settings_Page {
         }
     }
 
+    /**
+     * Reset all options key when the page is uninstalled
+     * 
+     */
     public static function uninstall() {
         foreach (CFA_Settings::$options_keys as $key => $value) {
             if ("" === get_option($key, "")) {
