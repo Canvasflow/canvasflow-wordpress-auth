@@ -12,7 +12,7 @@
  * Requires Plugins: WooCommerce
  * Plugin URI:  https://github.com/Canvasflow/canvasflow-wordpress-auth
  * Description: This plugin is an authentication connector for Canvasflow
- * Version:     0.1.0
+ * Version:     1.0.0
  * Author:      Canvasflow
  * Author URI:  https://canvasflow.io
  * License:     GPL v2 or later
@@ -27,12 +27,12 @@ require_once ($dir_path.'includes/canvasflow-auth-entitlements.php');
 require_once($dir_path.'includes/canvasflow-auth-controller.php');
 require_once ($dir_path.'includes/canvasflow-auth-settings.php');
 
-$major_version = 0;
+$major_version = 1;
 $plugin_name = 'canvasflow-auth';
 
 $settings = array(
   'major_version' => $major_version,
-  'version' => $major_version.".1.0",
+  'version' => $major_version.".0.0",
   'options' => [
     'role' => Canvasflow_Auth_Settings::$option_role_key,
     'access_token' => Canvasflow_Auth_Settings::$option_access_token_ttl_key,

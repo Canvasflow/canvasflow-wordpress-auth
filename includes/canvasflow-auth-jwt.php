@@ -30,13 +30,12 @@ class Canvasflow_JWT {
 
      /**
      * Options for the plugin
-     * @var string
+     * @var array
      */
     private $options;
 
     /**
      * Initialize the JWT
-     * 
      *
      * @param array $settings Settings for the plugin
      */
