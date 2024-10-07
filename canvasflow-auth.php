@@ -17,11 +17,15 @@
  * Author URI:  https://canvasflow.io
  * License:     GPL v2 or later
  * License URI: http://www.gnu.org/licenses/gpl-2.0.txt
+ * Requires at least: 6.5
+ * Requires PHP: 7.4
  */
 
 define('AUTH_DEFAULT_ROLE', 'subscriber');
 
 $dir_path = plugin_dir_path(__FILE__);
+
+// Load required packages
 require_once ($dir_path.'includes/class-cfa-settings.php');
 require_once ($dir_path.'includes/class-cfa-jwt.php');
 require_once ($dir_path.'includes/class-cfa-entitlements.php');
