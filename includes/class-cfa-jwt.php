@@ -113,6 +113,7 @@ class CFA_JWT {
         $payload = $this->encode(array(         
             'amr' => 'wordpress',
             'exp' => $exp,
+            'aud' => $this->aud,
             'iat' => $now,
             'iss' => $this->iss,
             'sub' => "{$user['id']}"

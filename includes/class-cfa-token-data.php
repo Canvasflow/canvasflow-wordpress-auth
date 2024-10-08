@@ -68,7 +68,7 @@ class CFA_Token_Data {
      * @return bool
      */
     public static function validate_audience($token, $jwt) {
-
+        return true;
     }
 
     /**
