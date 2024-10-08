@@ -59,6 +59,18 @@ class CFA_Token_Data {
         $this->jwt = $jwt;
     }
 
+    // TODO Implement this function
+    /**
+     * Validates token audience with stored client id
+     * 
+     * @param string $token Refresh token
+     * @param CFA_JWT $jwt
+     * @return bool
+     */
+    public static function validate_audience($token, $jwt) {
+
+    }
+
     /**
      * Builds the data for the token and stores it in the public attributes
      * 

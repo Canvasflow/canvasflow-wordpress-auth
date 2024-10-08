@@ -98,6 +98,16 @@ class CFA_Controller extends WP_REST_Controller {
             }
         ));
 
+        register_rest_route($this->namespace, '/info', array(
+            'methods' => WP_REST_Server::READABLE,
+            'callback' => array(
+                $this,
+                'info'
+            ),
+            'permission_callback' => function () {
+                return true;
+            }
+        ));
 
         register_rest_route($this->namespace, '/authorize', array(
             'methods' => WP_REST_Server::CREATABLE,
@@ -216,11 +226,6 @@ class CFA_Controller extends WP_REST_Controller {
         $response->set_headers(self::$headers);
         $jwt = new CFA_JWT();
 
-        $r = $this->validate_request($request);
-        if($r != NULL) {
-            return $r;
-        }
-
         $refresh_token = $_GET['refresh_token'];
 
         if(empty($refresh_token)) {
@@ -276,7 +281,7 @@ class CFA_Controller extends WP_REST_Controller {
      * Validate Request function
      * 
      * This function validates that the user send all the required 
-     * headers and that the plugin installed all the required information
+     * params and that the plugin installed all the required information
      * to validate the request. If the request is successfull it will 
      * return NULL, otherwise it will return a WP_REST_Response with 
      * the error message
@@ -287,11 +292,16 @@ class CFA_Controller extends WP_REST_Controller {
     private function validate_request($request) {
         $response = new WP_REST_Response;
         $response->set_headers(self::$headers);
-        $client_id = $request->get_header('X-Canvasflow-App-Key');
+        $client_id = NULL;
+        if ('POST' == $request->get_method()) {
+            $parameters = $request->get_params();
+            $client_id = $parameters['client_id'];
+        }
+        
         if($client_id == NULL) {
             $response->set_data([
-                'error' => 'Missing header "X-Canvasflow-App-Key"',
-                'code' => 'MISSING_REQUIRED_HEADER'
+                'error' => 'Missing param "client_id"',
+                'code' => 'MISSING_REQUIRED_PARAM'
             ]);
             $response->set_status(400);
             return $response;
@@ -317,6 +327,45 @@ class CFA_Controller extends WP_REST_Controller {
             return $response;
         }
 
+        return NULL;
+    }
+
+    /**
+     * Validate Audience Function
+     * 
+     * This function validates that the refresh token audience is valid
+     * and that the plugin installed all the required information
+     * to validate the request. If the request is successfull it will 
+     * return NULL, otherwise it will return a WP_REST_Response with 
+     * the error message
+     *
+     * @param WP_REST_Request $request Full data about the request.
+     * @return WP_REST_Response|NULL
+     */
+    private function validate_audience($token) {
+        $response = new WP_REST_Response;
+        $response->set_headers(self::$headers);
+        $jwt = new CFA_JWT();
+
+        $client_id_key = $this->keys['client_id'];
+        $stored_client_id = get_option($client_id_key, "");
+        if($stored_client_id == '') {
+            $response->set_data([
+                'error' => 'The client id is not set',
+                'code' => 'MISSING_CLIENT_ID'
+            ]);
+            $response->set_status(500);
+            return $response;
+        }
+        
+        if(CFA_Token_Data::validate_audience($token, $jwt) == false) {        
+            $response->set_data([
+                'error' => 'Invalid client id',
+                'code' => 'INVALID_CLIENT_ID'
+            ]);
+            $response->set_status(409);
+            return $response;
+        }
         return NULL;
     }
 
