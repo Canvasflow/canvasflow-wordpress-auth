@@ -258,6 +258,11 @@ class CFA_Controller extends WP_REST_Controller {
             return $response;
         }
 
+        $r = $this->validate_audience($refresh_token, $jwt);
+        if($r != NULL) {
+            return $r;
+        }
+
         $sub = $payload['sub'];
 
         $user = get_user_by('id', $sub );
@@ -339,13 +344,13 @@ class CFA_Controller extends WP_REST_Controller {
      * return NULL, otherwise it will return a WP_REST_Response with 
      * the error message
      *
-     * @param WP_REST_Request $request Full data about the request.
+     * @param stirng $token validate token audience
+     * @param CFA_JWT $jwt
      * @return WP_REST_Response|NULL
      */
-    private function validate_audience($token) {
+    private function validate_audience($token, $jwt) {
         $response = new WP_REST_Response;
         $response->set_headers(self::$headers);
-        $jwt = new CFA_JWT();
 
         $client_id_key = $this->keys['client_id'];
         $stored_client_id = get_option($client_id_key, "");
